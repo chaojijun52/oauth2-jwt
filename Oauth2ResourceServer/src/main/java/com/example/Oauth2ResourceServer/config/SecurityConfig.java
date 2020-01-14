@@ -1,5 +1,7 @@
 package com.example.Oauth2ResourceServer.config;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -7,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -18,11 +22,13 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
+import com.nimbusds.jose.util.IOUtils;
+
 @Configuration
 @EnableResourceServer
 public class SecurityConfig extends ResourceServerConfigurerAdapter {
-	@Value("${security.signing-key}")
-    private String signingKey;
+//	@Value("${security.signing-key}")
+//    private String signingKey;
 
     @Value("${security.encoding-strength}")
     private Integer encodingStrength;
@@ -67,7 +73,25 @@ public class SecurityConfig extends ResourceServerConfigurerAdapter {
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
         JwtAccessTokenConverter converter = new CustomJwtAccessTokenConverter();//new JwtAccessTokenConverter();
-        converter.setSigningKey(signingKey);
+        Resource resource=new ClassPathResource("public.txt");
+        String publicKey = null;
+        try {
+            publicKey = resource.getInputStream().toString();
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+//        converter.setSigningKey(signingKey);
+        System.out.println("Public key: "+publicKey);
+        publicKey="-----BEGIN PUBLIC KEY-----\r\n" + 
+        		"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlf/N+8VkgpZt7p+SgkMA\r\n" + 
+        		"w7XDuB83AW9yeuqrDEbc+eai6L9AYAuxdYLRwLSMAzl5x9lDc0vNkEfGSuv8j3z/\r\n" + 
+        		"b4ZcppnnmO9MS+QFUfEAR8/RtyCdAHJRwua9rAkqFeWr1zPyj2o56Fz83/4ivW4E\r\n" + 
+        		"fAwXScVxaXBc1ccvTTKaeJcTa56b/8XqOFUNZKiI1ovOvm1J4avs+9zviUo1DD9E\r\n" + 
+        		"D9ao9aOMCvs5OsH28M26FJqUgJaF4sTNf0so0kB944mhVr9HnAAs4VJoJgJsJTkR\r\n" + 
+        		"jBl7Y2Jr7IrNJ7meTOSsQOFlSEAciiej2DtZxtyT395BN5L2FeJE4oDal+dnY17P\r\n" + 
+        		"pwIDAQAB\r\n" + 
+        		"-----END PUBLIC KEY-----";
+        converter.setVerifierKey(publicKey);
         return converter;
     }
  

@@ -29,9 +29,10 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException(String.format("The username %s doesn't exist", username));
         }
 		List<GrantedAuthority> authorities = new ArrayList<>();
-        for(String role : user.getRoles().split(",")) {
-            authorities.add(new SimpleGrantedAuthority(role));
-        };
+//        for(String role : user.getRoles().split(",")) {
+//            authorities.add(new SimpleGrantedAuthority(role));
+//        };
+		authorities.add(new SimpleGrantedAuthority("USER"));
 
 //        System.out.println("username: "+user.getUsername()+", password: "+user.getPassword()+", roles: "+user.getRoles());
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(user.getUsername(), new BCryptPasswordEncoder().encode(user.getPassword()), authorities);
